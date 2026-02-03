@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Dans Git, deux stratégies principales permettent d'intégrer des changements d'une branche vers une autre : **merge** et **rebase**. Ce document analyse les deux approches, leurs avantages, leurs inconvénients, et définit la politique choisie pour ce projet.
+Dans Git, il y a deux stratégies principales pour intégrer des changements d'une branche vers une autre : **merge** et **rebase**. Ce document analyse les deux approches, leurs avantages, leurs inconvénients, et définit la méthode choisie pour ce projet.
 
 ---
 
@@ -10,35 +10,19 @@ Dans Git, deux stratégies principales permettent d'intégrer des changements d'
 
 ### Merge
 
-Le **merge** crée un commit de fusion qui combine l'historique de deux branches, préservant l'historique complet du projet.
+Le **merge** crée un commit de fusion qui combine l'historique de deux branches, cette méthode préserve l'historique complet du projet.
 
-```
-Avant merge :
-main:     A---B---C
-                \
-feature:         D---E
 
-Après merge :
-main:     A---B---C-------M
-                \       /
-feature:         D---E
-```
+
+![Schéma visuel du merge](images/merge-diagram.png)
+
+
 
 ### Rebase
 
 Le **rebase** réécrit l'historique en déplaçant les commits d'une branche sur la pointe d'une autre, créant un historique linéaire.
 
-```
-Avant rebase :
-main:     A---B---C
-                \
-feature:         D---E
-
-Après rebase :
-main:     A---B---C
-                    \
-feature:             D'---E'
-```
+![Schéma visuel du rebase](images/rebase-diagram.png)
 
 ---
 
@@ -131,11 +115,10 @@ feature:             D'---E'
 **Scénario** : Intégrer une feature dans `develop`
 
 ```bash
-# Sur la branche develop
 git checkout develop
 git pull origin develop
 
-# Merger la feature
+# On merge la feature
 git merge --no-ff feature/add-redis-cache
 
 # Résultat dans git log
@@ -237,35 +220,10 @@ git rebase develop
 
 ### Workflow Recommandé
 
-```bash
-# 1. Créer la feature depuis develop
-git checkout develop
-git pull origin develop
-git checkout -b feature/nom-feature
-
-# 2. Développer et commiter
-git add .
-git commit -m "feat: première fonctionnalité"
-git commit -m "feat: deuxième fonctionnalité"
-# ... au moins 5 commits atomiques
-
-# 3. Mettre à jour avec develop (rebase)
-git fetch origin
-git rebase origin/develop
-# Résoudre les conflits si nécessaire
-
-# 4. Pousser la branche (force push si rebase)
-git push -u origin feature/nom-feature
-# Si rebase : git push -u origin feature/nom-feature --force-with-lease
-
-# 5. Créer la PR et attendre la review
-
-# 6. Après approbation, merger dans develop (merge)
-git checkout develop
-git pull origin develop
-git merge --no-ff feature/nom-feature
-git push origin develop
-```
+1. Créer la feature depuis `develop` et développer (minimum 5 commits atomiques)
+2. Mettre à jour avec `develop` via rebase (si branche locale)
+3. Pousser la branche et créer la PR
+4. Après approbation, merger dans `develop` via merge avec `--no-ff`
 
 ---
 
@@ -304,136 +262,11 @@ git log --oneline --graph --all
 
 ---
 
-## Quand Utiliser Chaque Approche : Guide de Décision
-
-### Utilisez Merge si :
-
-- ✅ Vous intégrez une branche dans une branche principale (`develop`, `main`)
-- ✅ La branche est partagée avec d'autres développeurs
-- ✅ Vous voulez préserver l'historique complet
-- ✅ Vous travaillez sur une release ou un hotfix
-- ✅ Vous voulez une traçabilité claire des intégrations
-
-### Utilisez Rebase si :
-
-- ✅ Vous mettez à jour votre branche feature avec `develop`
-- ✅ La branche est locale et n'est pas encore partagée
-- ✅ Vous voulez un historique linéaire et propre
-- ✅ Vous nettoyez l'historique avant un merge
-- ✅ Vous êtes le seul à travailler sur la branche
-
-### Ne jamais utiliser Rebase si :
-
-- ❌ La branche a déjà été poussée et d'autres y travaillent
-- ❌ Vous êtes sur `main` ou `develop`
-- ❌ Vous n'êtes pas sûr de ce que vous faites
-
----
-
-## Commandes Utiles
-
-### Merge
-
-```bash
-# Merge simple
-git merge feature/nom-feature
-
-# Merge avec commit explicite (recommandé)
-git merge --no-ff feature/nom-feature
-
-# Merge avec message personnalisé
-git merge --no-ff -m "feat: integrate Redis cache feature" feature/nom-feature
-
-# Annuler un merge (avant de commiter)
-git merge --abort
-```
-
-### Rebase
-
-```bash
-# Rebase interactif
-git rebase -i develop
-
-# Rebase avec résolution automatique
-git rebase develop
-
-# Continuer après résolution de conflit
-git rebase --continue
-
-# Annuler un rebase
-git rebase --abort
-
-# Rebase avec force push (attention !)
-git push --force-with-lease origin feature/nom-feature
-```
-
-### Visualisation
-
-```bash
-# Voir l'historique avec graphique
-git log --oneline --graph --all
-
-# Voir les différences entre merge et rebase
-git log --oneline --graph --all --decorate
-
-# Voir l'historique d'une branche spécifique
-git log --oneline feature/nom-feature
-```
-
----
-
 ## Conclusion
 
-### Politique Finale
+Pour ce projet **DevOps Foundations**, nous utilisons une **approche hybride** : **Merge pour l'intégration, Rebase pour la mise à jour**.
 
-Pour ce projet **DevOps Foundations**, nous utilisons une **approche hybride** :
-
-- **Merge** pour toutes les intégrations dans les branches principales (`develop`, `main`)
-- **Rebase** pour mettre à jour les branches de feature locales avant le merge final
-
-Cette approche combine :
-- La **sécurité** du merge (pas de perte de données)
-- La **propreté** du rebase (historique lisible)
-- La **traçabilité** (on sait quand les features ont été intégrées)
-
-### Justification Technique
-
-1. **Sécurité** : Le merge préserve l'historique et évite les risques de perte de commits
-2. **Traçabilité** : Les commits de merge indiquent clairement les intégrations
-3. **Propreté** : Le rebase avant merge garde l'historique lisible
-4. **Simplicité** : Les développeurs peuvent se concentrer sur le code, pas sur Git
-
-Cette politique garantit un historique Git professionnel, exploitable pour le debugging, l'audit, et la compréhension de l'évolution du projet.
-
----
-
-## FAQ
-
-### Puis-je rebaser une branche après avoir créé une PR ?
-
-**Réponse** : Oui, mais avec précaution. Si la PR n'a pas encore de reviewers actifs, vous pouvez rebaser et faire un force push. Si des reviewers travaillent déjà dessus, mieux vaut utiliser merge pour intégrer les changements de `develop`.
-
-### Que faire si j'ai déjà fait un rebase sur une branche partagée ?
-
-**Réponse** : 
-1. Informer immédiatement l'équipe
-2. Chaque développeur doit faire :
-   ```bash
-   git fetch origin
-   git reset --hard origin/feature/nom-feature
-   ```
-3. Éviter de rebaser à l'avenir sur cette branche
-
-### Merge ou rebase pour les hotfixes ?
-
-**Réponse** : Toujours **merge**. Les hotfixes nécessitent une traçabilité complète et ne doivent jamais modifier l'historique.
-
-### Comment savoir si je dois utiliser merge ou rebase ?
-
-**Règle simple** : 
-- Branche locale non partagée → **Rebase** pour mise à jour
-- Intégration dans `develop`/`main` → **Merge**
-- Branche partagée → **Merge uniquement**
+Cette politique combine la **sécurité** du merge (préservation de l'historique), la **propreté** du rebase (historique lisible), et la **traçabilité** (commits de merge indiquant les intégrations). Elle garantit un historique Git professionnel, exploitable pour le debugging, l'audit, et la compréhension de l'évolution du projet.
 
 ---
 
