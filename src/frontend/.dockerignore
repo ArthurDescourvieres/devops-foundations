@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.next
+.nuxt
+dist
+build
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+coverage
+.nyc_output
