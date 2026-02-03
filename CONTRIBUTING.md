@@ -13,6 +13,10 @@ Ce document décrit le workflow Git, les conventions de commits et le processus 
 
 ---
 
+## Stratégie de Branching (GitFlow)
+
+Ce projet utilise **GitFlow** comme stratégie de gestion des branches. Cette approche permet une organisation claire du développement et facilite la collaboration.
+
 ### Branches principales
 
 #### `main`
@@ -65,6 +69,21 @@ feature/*           ●──●    ●──●
 ## Conventions de Commits
 
 Ce projet suit les **Conventional Commits** pour garantir un historique Git clair et exploitable.
+
+### Format général
+
+```
+<type>(<scope>): <description courte>
+```
+
+### Scope (optionnel)
+
+Le scope indique la partie du projet affectée :
+- `backend` : Service backend
+- `frontend` : Service frontend
+- `docker` : Configuration Docker
+- `traefik` : Configuration Traefik
+- `docs` : Documentation
 
 ### Types de commits
 
