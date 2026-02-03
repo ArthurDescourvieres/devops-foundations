@@ -396,11 +396,34 @@ Conflicts resolved:
 
 ---
 
+## Gestion des conflits dans les Pull Requests
+
+### Prévention des conflits
+
+1. **Mettre à jour régulièrement avec develop**
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout feature/votre-feature
+   git rebase develop  # ou merge selon la politique
+   ```
+
+2. **Communiquer avec l'équipe**
+   - Informer si vous travaillez sur des fichiers partagés
+   - Coordonner les changements majeurs
+
+### Résolution des conflits
+
+Voir la section [Résolution de conflits](#résolution-de-conflits) ci-dessus.
+
+---
+
 ## Ressources
 
 - [GitFlow Workflow (Atlassian)](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Pro Git Book (Français)](https://git-scm.com/book/fr/v2)
+- [GitHub Flow](https://guides.github.com/introduction/flow/)
 
 ---
 
