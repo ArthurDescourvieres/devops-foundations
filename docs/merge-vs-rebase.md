@@ -108,166 +108,52 @@ Le **rebase** réécrit l'historique en déplaçant les commits d'une branche su
 
 ---
 
-## Exemples Concrets
-
-### Exemple 1 : Merge
-
-**Scénario** : Intégrer une feature dans `develop`
-
-```bash
-git checkout develop
-git pull origin develop
-
-# On merge la feature
-git merge --no-ff feature/add-redis-cache
-
-# Résultat dans git log
-*   Merge branch 'feature/add-redis-cache' into develop
-|\
-| * feat(backend): add Redis connection test
-| * feat(backend): implement visit counter endpoint
-| * docs: update API documentation
-|/
-* Previous commit on develop
-```
-
-**Avantages dans ce cas** :
-- On voit clairement quand la feature a été intégrée
-- L'historique de la feature est préservé
-- Facile à annuler si nécessaire
-
-### Exemple 2 : Rebase
-
-**Scénario** : Mettre à jour une feature avec les derniers changements de `develop`
-
-```bash
-# Sur la branche feature
-git checkout feature/add-redis-cache
-git rebase develop
-
-# Résultat dans git log (après merge dans develop)
-* feat(backend): add Redis connection test
-* feat(backend): implement visit counter endpoint
-* docs: update API documentation
-* Previous commit on develop
-```
-
-**Avantages dans ce cas** :
-- Historique linéaire et propre
-- Pas de commit de merge inutile
-- Facile à suivre l'évolution
-
----
-
-## Politique Choisie pour ce Projet
-
-### Règle générale : **Merge pour l'intégration, Rebase pour la mise à jour**
-
-#### Utiliser Merge pour :
-
-1. **Intégrer une feature dans `develop`**
-   ```bash
-   git checkout develop
-   git merge --no-ff feature/nom-feature
-   ```
-   - **Justification** : Préserve l'historique de la feature et indique clairement quand elle a été intégrée
-
-2. **Intégrer `develop` dans `main` (release)**
-   ```bash
-   git checkout main
-   git merge --no-ff develop
-   git tag -a v1.0.0 -m "Release version 1.0.0"
-   ```
-   - **Justification** : Traçabilité des releases, historique complet
-
-3. **Intégrer un hotfix dans `main`**
-   ```bash
-   git checkout main
-   git merge --no-ff hotfix/fix-description
-   ```
-   - **Justification** : Sécurité et traçabilité des corrections critiques
-
-#### Utiliser Rebase pour :
-
-1. **Mettre à jour une feature avec `develop`**
-   ```bash
-   git checkout feature/nom-feature
-   git rebase develop
-   ```
-   - **Justification** : Garde l'historique propre avant le merge final
-   - **Important** : Uniquement si la branche n'est pas encore partagée
-
-2. **Nettoyer l'historique avant un merge (optionnel)**
-   ```bash
-   # Squash les commits de la feature si nécessaire
-   git rebase -i develop
-   ```
-   - **Justification** : Créer des commits atomiques et cohérents
-
-### Règles strictes
-
-1. **Ne jamais rebaser une branche déjà poussée et partagée**
-   - Si d'autres développeurs travaillent sur la branche, utiliser merge
-   - Le rebase doit être fait uniquement sur les branches locales
-
-2. **Toujours utiliser `--no-ff` pour les merges**
-   - Force la création d'un commit de merge même si fast-forward est possible
-   - Préserve la traçabilité des intégrations
-
-3. **Rebase uniquement sur les branches de feature locales**
-   - Avant de créer la PR, rebaser sur `develop` pour avoir un historique propre
-   - Une fois la PR créée, ne plus rebaser (utiliser merge pour intégrer les changements)
-
-### Workflow Recommandé
-
-1. Créer la feature depuis `develop` et développer (minimum 5 commits atomiques)
-2. Mettre à jour avec `develop` via rebase (si branche locale)
-3. Pousser la branche et créer la PR
-4. Après approbation, merger dans `develop` via merge avec `--no-ff`
-
----
-
 ## Démonstration dans l'Historique Git
 
-### Exemple de merge dans l'historique
+### Exemple réel : Démonstration visuelle
 
-```bash
-# Voir l'historique avec les merges
-git log --oneline --graph --all
+Cette section présente un exemple réel tiré de l'historique du projet lors de la démonstration de merge vs rebase sur la branche `feature/docs-git-workflow`.
 
-# Résultat typique :
-*   a1b2c3d Merge branch 'feature/add-redis-cache' into develop
-|\
-| * d4e5f6g feat(backend): implement visit counter endpoint
-| * f7g8h9i feat(backend): add Redis connection test
-| * h0i1j2k docs: update API documentation
-|/
-* j3k4l5m Previous commit on develop
-```
+![Historique Git montrant l'effet du rebase](images/git-history-rebase-demo.png)
 
-### Exemple de rebase dans l'historique
+**Description de l'image** :
 
-```bash
-# Voir l'historique après rebase et merge
-git log --oneline --graph --all
+L'image montre l'historique Git avec deux séquences de commits :
 
-# Résultat typique :
-* d4e5f6g feat(backend): implement visit counter endpoint
-* f7g8h9i feat(backend): add Redis connection test
-* h0i1j2k docs: update API documentation
-* j3k4l5m Previous commit on develop
-```
+- **Première séquence (haut)** : Historique initial de la branche avec 8 commits (7666f59 à d818429)
+- **Deuxième séquence (bas)** : Historique après rebase avec 8 commits (453d2e9 à 2041fb7), visualisée par la ligne rouge indiquant la branche `origin/feature/docs-git-workflow`
 
-**Note** : Après le merge final, l'historique linéaire du rebase est préservé, mais le commit de merge indique quand l'intégration a eu lieu.
+### Observations importantes
 
----
+1. **Réécriture des commits** : Les commits `91886e0` à `2041fb7` ont les mêmes messages que `7666f59` à `2b2b5e7`, mais avec des **hash différents**. Cela démontre que le rebase a réécrit l'historique.
+
+2. **Nouveau commit ajouté** : Le commit `453d2e9` est unique à la branche rebasée et représente un nouveau travail effectué après le rebase.
+
+3. **Commit non rebasé** : Le commit `d818429` (chore: add demo section) n'apparaît pas dans la séquence rebasée, ce qui peut indiquer qu'il a été supprimé ou qu'il était sur une autre branche.
+
+4. **Visualisation de la branche** : La ligne rouge dans `git log --graph` indique visuellement la branche `feature/docs-git-workflow` après le rebase.
+
 
 ## Conclusion
 
-Pour ce projet **DevOps Foundations**, nous utilisons une **approche hybride** : **Merge pour l'intégration, Rebase pour la mise à jour**.
+Pour ce projet **DevOps Foundations**, j'utilise une **approche basée uniquement sur le merge**.
 
-Cette politique combine la **sécurité** du merge (préservation de l'historique), la **propreté** du rebase (historique lisible), et la **traçabilité** (commits de merge indiquant les intégrations). Elle garantit un historique Git professionnel, exploitable pour le debugging, l'audit, et la compréhension de l'évolution du projet.
+### Pourquoi pas de rebase ?
 
----
+Bien que le rebase puisse créer un historique visuellement plus linéaire, j'ai choisi de ne pas l'utiliser pour les raisons suivantes :
 
-**Dernière mise à jour** : 2025-01-09
+1. **Préservation de l'ordre temporel réel** : Le rebase réécrit l'historique et fausse l'ordre chronologique réel des commits. Un commit créé lundi peut apparaître comme créé mercredi après un rebase, ce qui complique le debugging et l'audit.
+
+2. **Éviter la duplication des commits** : Le rebase crée de nouveaux commits avec de nouveaux hash pour le même contenu, dupliquant ainsi l'historique. Les commits originaux existent toujours (dans le reflog), créant une confusion entre les versions "originales" et "rebasées".
+
+3. **Simplicité et sécurité** : Le merge est plus simple à comprendre, moins risqué, et préserve l'historique complet du projet sans modification.
+
+4. **Traçabilité honnête** : Les commits de merge indiquent clairement quand et comment les branches ont été intégrées, reflétant la réalité du développement plutôt qu'une version réécrite.
+
+### Politique adoptée
+
+- **Merge uniquement** pour toutes les intégrations (feature → develop, develop → main, hotfix → main)
+- **Utilisation de `--no-ff`** pour forcer les commits de merge et préserver la traçabilité
+- **Historique complet préservé** : chaque commit garde sa date réelle et son contexte original
+
+Cette approche garantit un historique Git **honnête, complet et exploitable** pour le debugging, l'audit, et la compréhension de l'évolution du projet, même si l'historique peut paraître plus complexe visuellement.
