@@ -407,4 +407,34 @@ Cette politique garantit un historique Git professionnel, exploitable pour le de
 
 ---
 
+## FAQ
+
+### Puis-je rebaser une branche après avoir créé une PR ?
+
+**Réponse** : Oui, mais avec précaution. Si la PR n'a pas encore de reviewers actifs, vous pouvez rebaser et faire un force push. Si des reviewers travaillent déjà dessus, mieux vaut utiliser merge pour intégrer les changements de `develop`.
+
+### Que faire si j'ai déjà fait un rebase sur une branche partagée ?
+
+**Réponse** : 
+1. Informer immédiatement l'équipe
+2. Chaque développeur doit faire :
+   ```bash
+   git fetch origin
+   git reset --hard origin/feature/nom-feature
+   ```
+3. Éviter de rebaser à l'avenir sur cette branche
+
+### Merge ou rebase pour les hotfixes ?
+
+**Réponse** : Toujours **merge**. Les hotfixes nécessitent une traçabilité complète et ne doivent jamais modifier l'historique.
+
+### Comment savoir si je dois utiliser merge ou rebase ?
+
+**Règle simple** : 
+- Branche locale non partagée → **Rebase** pour mise à jour
+- Intégration dans `develop`/`main` → **Merge**
+- Branche partagée → **Merge uniquement**
+
+---
+
 **Dernière mise à jour** : 2025-01-09
