@@ -2,6 +2,8 @@
 
 Ce document décrit le workflow Git, les conventions de commits et le processus de contribution pour ce projet.
 
+> **Note** : Ce guide suit les bonnes pratiques DevOps et GitFlow. En cas de doute, privilégiez la sécurité (merge) à la propreté (rebase).
+
 ## Table des matières
 
 - [Stratégie de Branching (GitFlow)](#stratégie-de-branching-gitflow)
