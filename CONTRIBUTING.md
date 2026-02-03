@@ -13,23 +13,18 @@ Ce document décrit le workflow Git, les conventions de commits et le processus 
 
 ---
 
-## Stratégie de Branching (GitFlow)
-
-Ce projet utilise **GitFlow** comme stratégie de gestion des branches. Cette approche permet une organisation claire du développement et facilite la collaboration.
-
 ### Branches principales
 
 #### `main`
 - **Rôle** : Branche de production, toujours stable et déployable
 - **Protection** : Branche protégée, aucune modification directe
 - **Intégration** : Uniquement via merge depuis `develop` ou `hotfix/*`
-- **Tags** : Chaque release est taguée (ex: `v1.0.0`)
+
 
 #### `develop`
 - **Rôle** : Branche d'intégration pour le développement
 - **Protection** : Branche protégée, aucune modification directe
 - **Intégration** : Uniquement via merge depuis `feature/*` ou `release/*`
-- **État** : Toujours prête pour la prochaine release
 
 ### Branches de support
 
@@ -58,101 +53,18 @@ Ce projet utilise **GitFlow** comme stratégie de gestion des branches. Cette ap
 ### Workflow visuel
 
 ```
-main          ●────────●────────●────────● (tags: v1.0.0, v1.1.0)
-               \      /        \      /
-                \    /          \    /
+main          ●────────●──────●──────●
+               \      /        \    /
+                \    /          \  /
 develop          ●──●──────────●──●
                   \  \        /  /
                    \  \      /  /
 feature/*           ●──●    ●──●
 ```
 
-### Commandes GitFlow
-
-#### Créer une feature
-```bash
-# Basculer sur develop
-git checkout develop
-git pull origin develop
-
-# Créer la branche feature
-git checkout -b feature/nom-de-la-feature
-
-# Développer et commiter
-git add .
-git commit -m "feat: description du changement"
-
-# Pousser la branche
-git push -u origin feature/nom-de-la-feature
-```
-
-#### Finaliser une feature
-```bash
-# S'assurer que develop est à jour
-git checkout develop
-git pull origin develop
-
-# Merger la feature dans develop
-git merge --no-ff feature/nom-de-la-feature
-
-# Supprimer la branche locale
-git branch -d feature/nom-de-la-feature
-
-# Supprimer la branche distante
-git push origin --delete feature/nom-de-la-feature
-```
-
-#### Créer une release
-```bash
-git checkout develop
-git checkout -b release/1.0.0
-
-# Préparer la release (version, changelog, etc.)
-# ...
-
-# Merger dans main et tagger
-git checkout main
-git merge --no-ff release/1.0.0
-git tag -a v1.0.0 -m "Release version 1.0.0"
-
-# Merger dans develop
-git checkout develop
-git merge --no-ff release/1.0.0
-```
-
-#### Créer un hotfix
-```bash
-git checkout main
-git checkout -b hotfix/fix-description
-
-# Corriger le bug
-# ...
-
-# Merger dans main et tagger
-git checkout main
-git merge --no-ff hotfix/fix-description
-git tag -a v1.0.1 -m "Hotfix version 1.0.1"
-
-# Merger dans develop
-git checkout develop
-git merge --no-ff hotfix/fix-description
-```
-
----
-
 ## Conventions de Commits
 
 Ce projet suit les **Conventional Commits** pour garantir un historique Git clair et exploitable.
-
-### Format général
-
-```
-<type>(<scope>): <description courte>
-
-[corps optionnel]
-
-[footer optionnel]
-```
 
 ### Types de commits
 
@@ -167,16 +79,6 @@ Ce projet suit les **Conventional Commits** pour garantir un historique Git clai
 | `test` | Ajout/modification de tests | `test(backend): add unit tests for health endpoint` |
 | `chore` | Tâches de maintenance | `chore: update dependencies` |
 | `ci` | Configuration CI/CD | `ci: add GitHub Actions workflow` |
-| `build` | Système de build | `build(docker): update Dockerfile base image` |
-
-### Scope (optionnel)
-
-Le scope indique la partie du projet affectée :
-- `backend` : Service backend
-- `frontend` : Service frontend
-- `docker` : Configuration Docker
-- `traefik` : Configuration Traefik
-- `docs` : Documentation
 
 ### Description
 
@@ -199,41 +101,6 @@ feat: Added new endpoint  # Pas de scope, "Added" au lieu de "add"
 fix bug in dashboard  # Pas de type, pas de format
 Update README  # Pas de type
 ```
-
-### Corps du commit (optionnel)
-
-Pour les commits complexes, ajouter un corps détaillant :
-- **Pourquoi** le changement est nécessaire
-- **Comment** il résout le problème
-- **Impact** sur le reste du code
-
-```bash
-feat(backend): add Redis cache endpoint
-
-Implement GET /cache endpoint that:
-- Tests Redis connection
-- Increments visit counter
-- Returns counter value and connection status
-
-This endpoint allows the frontend to display
-the visit counter and verify cache availability.
-```
-
-### Footer (optionnel)
-
-Pour référencer des issues ou breaking changes :
-
-```bash
-feat(api): change authentication method
-
-BREAKING CHANGE: JWT tokens now expire after 1 hour
-instead of 24 hours. Clients must refresh tokens
-more frequently.
-
-Closes #123
-```
-
----
 
 ## Processus de Code Review
 
@@ -355,78 +222,3 @@ Avant de créer une Pull Request, vérifier chaque point :
 - [ ] Les dépendances sont à jour (pas de vulnérabilités connues)
 - [ ] Les middlewares de sécurité Traefik sont actifs
 - [ ] Les services utilisent des utilisateurs non-root
-
----
-
-## Résolution de conflits
-
-### Pendant un merge
-
-Si des conflits apparaissent lors du merge :
-
-1. **Identifier les fichiers en conflit**
-   ```bash
-   git status
-   ```
-
-2. **Ouvrir les fichiers** et résoudre les conflits manuellement
-   - Chercher les marqueurs `<<<<<<<`, `=======`, `>>>>>>>`
-   - Choisir la version appropriée ou combiner les deux
-
-3. **Marquer comme résolu**
-   ```bash
-   git add fichier-resolu.md
-   ```
-
-4. **Finaliser le merge**
-   ```bash
-   git commit -m "docs: resolve merge conflicts in CONTRIBUTING.md"
-   ```
-
-### Documentation des conflits
-
-Pour les conflits importants, documenter la résolution dans le message de commit :
-
-```bash
-docs: resolve merge conflicts in docker-compose.yml
-
-Conflicts resolved:
-- Kept production resource limits from develop
-- Merged new health check config from feature
-- Preserved network isolation from both branches
-```
-
----
-
-## Gestion des conflits dans les Pull Requests
-
-### Prévention des conflits
-
-1. **Mettre à jour régulièrement avec develop**
-   ```bash
-   git checkout develop
-   git pull origin develop
-   git checkout feature/votre-feature
-   git rebase develop  # ou merge selon la politique
-   ```
-
-2. **Communiquer avec l'équipe**
-   - Informer si vous travaillez sur des fichiers partagés
-   - Coordonner les changements majeurs
-
-### Résolution des conflits
-
-Voir la section [Résolution de conflits](#résolution-de-conflits) ci-dessus.
-
----
-
-## Ressources
-
-- [GitFlow Workflow (Atlassian)](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
-- [Conventional Commits](https://www.conventionalcommits.org/)
-- [Pro Git Book (Français)](https://git-scm.com/book/fr/v2)
-- [GitHub Flow](https://guides.github.com/introduction/flow/)
-
----
-
-**Dernière mise à jour** : 2025-01-09
