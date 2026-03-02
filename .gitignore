@@ -1,3 +1,13 @@
 .env
 .cursor/
 consigne.md
+
+# Dependencies & build
+node_modules/
+dist/
+build/
+
+# Logs & env local
+*.log
+.env.local
+.env.*.local
