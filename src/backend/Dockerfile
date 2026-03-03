@@ -9,7 +9,7 @@ COPY package*.json ./
 
 FROM base AS production
 
-RUN npm ci && \
+RUN npm install --omit=dev && \
     npm cache clean --force
 
 COPY --chown=backend:backend . .

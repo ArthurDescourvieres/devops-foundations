@@ -4,6 +4,7 @@ import { serve } from "@hono/node-server";
 import { getDbStatus } from "./db.js";
 import { getCacheStatus } from "./cache.js";
 import { sendContactEmail } from "./contact.js";
+import { getNumberEnv } from "./env.js";
 
 const cjsRequire = createRequire(import.meta.url);
 const pkg = cjsRequire("./package.json") as { version: string };
@@ -39,10 +40,24 @@ app.post("/contact", async (c) => {
   const name = body?.name;
   const email = body?.email;
   const message = body?.message;
-  if (typeof name !== "string" || !name.trim() || typeof email !== "string" || !email.trim() || typeof message !== "string" || !message.trim()) {
-    return c.json({ success: false, error: "name, email and message are required" }, 400);
+  if (
+    typeof name !== "string" ||
+    !name.trim() ||
+    typeof email !== "string" ||
+    !email.trim() ||
+    typeof message !== "string" ||
+    !message.trim()
+  ) {
+    return c.json(
+      { success: false, error: "name, email and message are required" },
+      400
+    );
   }
-  const result = await sendContactEmail({ name: name.trim(), email: email.trim(), message: message.trim() });
+  const result = await sendContactEmail({
+    name: name.trim(),
+    email: email.trim(),
+    message: message.trim(),
+  });
   if ("ok" in result && result.ok) {
     return c.json({ success: true }, 200);
   }
@@ -50,7 +65,7 @@ app.post("/contact", async (c) => {
   return c.json({ success: false, error }, 503);
 });
 
-const port = Number(process.env.BACKEND_PORT) || 3000;
+const port = getNumberEnv("BACKEND_PORT") ?? 3000;
 serve({ fetch: app.fetch, port }, (info) => {
   console.log(`Server listening on http://localhost:${info.port}`);
 });

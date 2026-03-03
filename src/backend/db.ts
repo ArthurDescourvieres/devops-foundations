@@ -1,9 +1,10 @@
 import { Pool } from "pg";
+import { getEnv } from "./env.js";
 
 let pool: Pool | null = null;
 
 function getPool(): Pool | null {
-  const url = process.env.DATABASE_URL?.trim();
+  const url = getEnv("DATABASE_URL");
   if (!url) return null;
   if (!pool) {
     pool = new Pool({ connectionString: url });
