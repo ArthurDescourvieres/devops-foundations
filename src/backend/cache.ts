@@ -1,4 +1,5 @@
 import { createClient, type RedisClientType } from "redis";
+import { getEnv } from "./env.js";
 
 export type CacheStatus =
   | { status: "ok"; visits: number }
@@ -13,19 +14,6 @@ const VISITS_KEY = "visits:counter";
 
 let client: RedisClientType | null = null;
 let connecting: Promise<RedisClientType> | null = null;
-
-function getEnv(key: string): string | undefined {
-  const env =
-    (globalThis as any)?.process?.env as
-      | Record<string, string | undefined>
-      | undefined;
-  const raw = env?.[key];
-  if (typeof raw !== "string") {
-    return undefined;
-  }
-  const trimmed = raw.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
 
 function getRedisConfig(): RedisConfig | null {
   const urlFromEnv = getEnv("REDIS_URL");
