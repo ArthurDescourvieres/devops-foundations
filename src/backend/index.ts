@@ -1,35 +1,39 @@
 import { createRequire } from "node:module";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { getDbStatus } from "./db";
-import { getCacheStatus } from "./cache";
-import { sendContactEmail } from "./contact";
+import { getDbStatus } from "./db.js";
+import { getCacheStatus } from "./cache.js";
+import { sendContactEmail } from "./contact.js";
 
-const require = createRequire(import.meta.url);
-const pkg = require("./package.json") as { version: string };
+const cjsRequire = createRequire(import.meta.url);
+const pkg = cjsRequire("./package.json") as { version: string };
 const VERSION = pkg.version;
 
 const app = new Hono();
 
 app.get("/", (c) =>
   c.json({
-    message: "DevOps Foundations API – Bienvenue",
+    message: "Bienvenue",
     version: VERSION,
   })
 );
+
 app.get("/health", (c) =>
   c.json({ status: "ok", service: "backend" })
 );
+
 app.get("/db", async (c) => {
   const result = await getDbStatus();
   const statusCode = result.status === "connected" ? 200 : 503;
   return c.json(result, statusCode);
 });
+
 app.get("/cache", async (c) => {
   const result = await getCacheStatus();
   const statusCode = result.status === "ok" ? 200 : 503;
   return c.json(result, statusCode);
 });
+
 app.post("/contact", async (c) => {
   const body = await c.req.json().catch(() => null);
   const name = body?.name;
@@ -42,7 +46,8 @@ app.post("/contact", async (c) => {
   if ("ok" in result && result.ok) {
     return c.json({ success: true }, 200);
   }
-  return c.json({ success: false, error: result.error }, 503);
+  const error = "error" in result ? result.error : "Unknown error";
+  return c.json({ success: false, error }, 503);
 });
 
 const port = Number(process.env.BACKEND_PORT) || 3000;
