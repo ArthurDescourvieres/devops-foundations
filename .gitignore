@@ -1,6 +1,5 @@
 .env
 .cursor/
-consigne.md
 
 # Dependencies & build
 node_modules/
