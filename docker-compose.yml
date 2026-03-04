@@ -19,13 +19,7 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
-    healthcheck:
-      test: ["CMD", "/mailpit", "readyz"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-
+      
   redis:
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
