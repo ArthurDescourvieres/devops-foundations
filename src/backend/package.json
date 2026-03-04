@@ -13,7 +13,8 @@
     "hono": "^4.0.0",
     "pg": "^8.11.0",
     "redis": "^4.7.1",
-    "ioredis": "^5.4.2"
+    "ioredis": "^5.4.2",
+    "nodemailer": "^6.9.13"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
