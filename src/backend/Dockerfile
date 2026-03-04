@@ -22,7 +22,7 @@ CMD ["npm", "run", "start"]
 
 FROM base AS development
 
-RUN npm ci && \
+RUN npm install && \
     npm cache clean --force && \
     rm -rf /tmp/* /var/tmp/*
 

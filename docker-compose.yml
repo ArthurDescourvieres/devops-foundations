@@ -11,6 +11,15 @@ services:
       postgres:
         condition: service_healthy
 
+  mailpit:
+    image: axllent/mailpit:v1.29
+    environment:
+      - MP_SMTP_BIND_ADDR=0.0.0.0:1025
+      - MP_UI_BIND_ADDR=0.0.0.0:8025
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+      
   redis:
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
@@ -37,7 +46,7 @@ services:
       start_period: 10s
 
   adminer:
-    image: adminer:4-standalone
+    image: adminer:5.4.2-standalone
     depends_on:
       postgres:
         condition: service_healthy
