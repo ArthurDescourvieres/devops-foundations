@@ -2,11 +2,11 @@ services:
   backend:
     container_name: backend
     build: ./src/backend
-    ports:
-      - 3010:3000
     env_file:
       - .env
-    depends_on:
+    labels:
+      traefik.http.routers.backend.rule: "Host(`localhost`)"
+    depends_on :
       - redis
       - postgres
 
@@ -16,9 +16,6 @@ services:
     environment:
       - MP_SMTP_BIND_ADDR=0.0.0.0:1025
       - MP_UI_BIND_ADDR=0.0.0.0:8025
-    ports:
-      - "1025:1025"
-      - "8025:8025"
       
   redis:
     container_name: redis
@@ -42,8 +39,20 @@ services:
       - postgres
     environment:
       - ADMINER_DEFAULT_SERVER=postgres
+
+  traefik:
+    container_name: traefik
+    image: traefik:v3.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
     ports:
+      - "80:80"
       - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
 
 volumes:
   redis-data:
