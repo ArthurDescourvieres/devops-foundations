@@ -1,6 +1,5 @@
 .env
 .cursor/
-consigne.md
 
 # Dependencies & build
 node_modules/
@@ -11,3 +10,7 @@ build/
 *.log
 .env.local
 .env.*.local
+
+
+traefik/certs/*
+!traefik/certs/.gitkeep
