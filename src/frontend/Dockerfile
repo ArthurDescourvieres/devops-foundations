@@ -1,3 +1,23 @@
+FROM node:20.18-alpine AS development
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY index.html tsconfig.json vite.config.ts ./
+COPY src ./src
+
+ARG VITE_API_BASE_URL=https://api.localhost
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
+EXPOSE 5173
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:5173/ > /dev/null || exit 1
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+
 FROM node:20.18-alpine AS builder
 
 WORKDIR /app
