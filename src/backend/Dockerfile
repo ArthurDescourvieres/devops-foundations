@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:20.18-alpine AS base
 
 RUN addgroup -g 1001 -S backend && \
     adduser -S backend -u 1001 -G backend
