@@ -1,16 +1,33 @@
 import { createRequire } from "node:module";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { getDbStatus } from "./db.js";
 import { getCacheStatus } from "./cache.js";
 import { sendContactEmail } from "./contact.js";
-import { getNumberEnv } from "./env.js";
+import {
+  getCorsAllowHeaders,
+  getCorsAllowMethods,
+  requireCommaSeparatedEnv,
+  requireListenPortEnv,
+} from "./env.js";
 
 const cjsRequire = createRequire(import.meta.url);
 const pkg = cjsRequire("./package.json") as { version: string };
 const VERSION = pkg.version;
 
 const app = new Hono();
+
+const frontendOrigins = requireCommaSeparatedEnv("FRONTEND_ORIGINS");
+
+app.use(
+  "/*",
+  cors({
+    origin: frontendOrigins,
+    allowMethods: getCorsAllowMethods(),
+    allowHeaders: getCorsAllowHeaders(),
+  })
+);
 
 app.get("/", (c) =>
   c.json({
@@ -65,7 +82,7 @@ app.post("/contact", async (c) => {
   return c.json({ success: false, error }, 503);
 });
 
-const port = getNumberEnv("BACKEND_PORT") ?? 3000;
+const port = requireListenPortEnv("BACKEND_PORT");
 serve({ fetch: app.fetch, port }, (info) => {
   console.log(`Server listening on http://localhost:${info.port}`);
 });
