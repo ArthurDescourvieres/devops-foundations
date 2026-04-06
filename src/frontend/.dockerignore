@@ -13,3 +13,10 @@ build
 .DS_Store
 coverage
 .nyc_output
+
+# Outils / éditeurs
+.cursor
+.vscode
+.idea
+*.md
+Thumbs.db

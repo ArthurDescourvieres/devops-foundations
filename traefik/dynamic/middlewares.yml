@@ -1,0 +1,28 @@
+http:
+  middlewares:
+    compress:
+      compress: {}
+
+    secure:
+      headers:
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: "no-referrer"
+        forceSTSHeader: true
+        stsSeconds: 15552000
+        stsIncludeSubdomains: true
+        stsPreload: true
+
+    api-ratelimit:
+      rateLimit:
+        average: 100
+        burst: 50
+
+    traefik-auth:
+      basicAuth:
+        usersFile: /etc/traefik/auth/traefik-users
+
+    adminer-auth:
+      basicAuth:
+        usersFile: /etc/traefik/auth/adminer-users

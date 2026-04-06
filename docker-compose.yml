@@ -1,0 +1,132 @@
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v3.6
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.network=public"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      - ./traefik/certs:/etc/traefik/certs:ro
+      - ./traefik/auth:/etc/traefik/auth:ro
+    networks:
+      - public
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: "Host(`traefik.localhost`)"
+      traefik.http.routers.traefik.entrypoints: "websecure"
+      traefik.http.routers.traefik.service: "api@internal"
+      traefik.http.routers.traefik.middlewares: "secure@file,compress@file,traefik-auth@file"
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./src/frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    labels:
+      traefik.docker.network: public
+      traefik.enable: "true"
+      traefik.http.routers.frontend.rule: "Host(`app.localhost`)"
+      traefik.http.routers.frontend.entrypoints: "websecure"
+      traefik.http.routers.frontend.middlewares: "secure@file,compress@file"
+      traefik.http.services.frontend.loadbalancer.server.port: "8080"
+    networks:
+      - public
+
+  backend:
+    container_name: backend
+    build: ./src/backend
+    env_file:
+      - .env
+    labels:
+      traefik.docker.network: public
+      traefik.enable: "true"
+      traefik.http.routers.backend.rule: "Host(`api.localhost`)"
+      traefik.http.routers.backend.entrypoints: "websecure"
+      traefik.http.routers.backend.middlewares: "secure@file,compress@file,api-ratelimit@file"
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - public
+      - backend
+
+  mailpit:
+    container_name: mailpit
+    image: axllent/mailpit:v1.29
+    environment:
+      - MP_SMTP_BIND_ADDR=0.0.0.0:1025
+      - MP_UI_BIND_ADDR=0.0.0.0:8025
+    labels:
+      traefik.docker.network: public
+      traefik.enable: "true"
+      traefik.http.routers.mailpit.rule: "Host(`mail.localhost`)"
+      traefik.http.routers.mailpit.entrypoints: "websecure"
+      traefik.http.services.mailpit.loadbalancer.server.port: "8025"
+      traefik.http.routers.mailpit.middlewares: "secure@file,compress@file"
+    networks:
+      - public
+      - backend
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  adminer:
+    container_name: adminer
+    image: adminer:5.4.2-standalone
+    depends_on:
+      - postgres
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+    labels:
+      traefik.docker.network: public
+      traefik.enable: "true"
+      traefik.http.routers.adminer.rule: "Host(`db.localhost`)"
+      traefik.http.routers.adminer.entrypoints: "websecure"
+      traefik.http.routers.adminer.middlewares: "secure@file,compress@file,adminer-auth@file"
+      traefik.http.services.adminer.loadbalancer.server.port: "8080"
+    networks:
+      - public
+      - backend
+
+networks:
+  public:
+    name: public
+  backend:
+    name: backend
+
+volumes:
+  redis-data:
+  postgres-data:
