@@ -23,6 +23,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
       - ./traefik/certs:/etc/traefik/certs:ro
+      - ./traefik/auth:/etc/traefik/auth:ro
     networks:
       - public
     labels:
@@ -30,8 +31,7 @@ services:
       traefik.http.routers.traefik.rule: "Host(`traefik.localhost`)"
       traefik.http.routers.traefik.entrypoints: "websecure"
       traefik.http.routers.traefik.service: "api@internal"
-      traefik.http.routers.traefik.middlewares: "secure@file,compress@file,traefik-auth"
-      traefik.http.middlewares.traefik-auth.basicauth.users: "${TRAEFIK_BASIC_AUTH_USERS}"
+      traefik.http.routers.traefik.middlewares: "secure@file,compress@file,traefik-auth@file"
 
   backend:
     container_name: backend
@@ -57,6 +57,7 @@ services:
       - MP_SMTP_BIND_ADDR=0.0.0.0:1025
       - MP_UI_BIND_ADDR=0.0.0.0:8025
     labels:
+      traefik.docker.network: public
       traefik.enable: "true"
       traefik.http.routers.mailpit.rule: "Host(`mail.localhost`)"
       traefik.http.routers.mailpit.entrypoints: "websecure"
@@ -93,11 +94,11 @@ services:
     environment:
       - ADMINER_DEFAULT_SERVER=postgres
     labels:
+      traefik.docker.network: public
       traefik.enable: "true"
       traefik.http.routers.adminer.rule: "Host(`db.localhost`)"
       traefik.http.routers.adminer.entrypoints: "websecure"
-      traefik.http.routers.adminer.middlewares: "secure@file,compress@file,adminer-auth"
-      traefik.http.middlewares.adminer-auth.basicauth.users: "${ADMINER_BASIC_AUTH_USERS}"
+      traefik.http.routers.adminer.middlewares: "secure@file,compress@file,adminer-auth@file"
       traefik.http.services.adminer.loadbalancer.server.port: "8080"
     networks:
       - public
