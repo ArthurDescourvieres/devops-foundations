@@ -14,3 +14,6 @@ build/
 
 traefik/certs/*
 !traefik/certs/.gitkeep
+
+traefik/auth/traefik-users
+traefik/auth/adminer-users
