@@ -18,3 +18,11 @@ http:
       rateLimit:
         average: 100
         burst: 50
+
+    traefik-auth:
+      basicAuth:
+        usersFile: /etc/traefik/auth/traefik-users
+
+    adminer-auth:
+      basicAuth:
+        usersFile: /etc/traefik/auth/adminer-users
