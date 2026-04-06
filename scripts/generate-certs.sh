@@ -9,5 +9,9 @@ if ! command -v mkcert >/dev/null 2>&1; then
 fi
 
 mkcert -install >/dev/null 2>&1 || true
-mkcert -cert-file local.crt -key-file local.key "*.localhost" localhost 127.0.0.1 ::1
+# Firefox / Zen (NSS) : le wildcard *.localhost ne couvre souvent PAS app.localhost, api.localhost, etc.
+# Il faut lister explicitement chaque nom (voir SSL_ERROR_BAD_CERT_DOMAIN).
+mkcert -cert-file local.crt -key-file local.key \
+  app.localhost api.localhost db.localhost mail.localhost traefik.localhost \
+  "*.localhost" localhost 127.0.0.1 ::1
 echo "OK : ${CERT_DIR}/local.crt et local.key"
