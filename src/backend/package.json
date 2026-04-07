@@ -14,12 +14,12 @@
     "pg": "^8.11.0",
     "redis": "^4.7.1",
     "ioredis": "^5.4.2",
-    "nodemailer": "^6.9.13"
+    "nodemailer": "^6.9.13",
+    "tsx": "^4.7.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/pg": "^8.10.0",
-    "tsx": "^4.7.0",
     "typescript": "^5.9.3"
   }
 }

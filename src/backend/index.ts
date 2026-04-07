@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { hostname } from "node:os";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
@@ -37,7 +38,7 @@ app.get("/", (c) =>
 );
 
 app.get("/health", (c) =>
-  c.json({ status: "ok", service: "backend" })
+  c.json({ status: "ok", service: "backend", hostname: hostname() })
 );
 
 app.get("/db", async (c) => {
