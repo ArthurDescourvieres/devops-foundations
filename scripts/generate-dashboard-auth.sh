@@ -37,4 +37,4 @@ docker run --rm httpd:2.4-alpine htpasswd -nbB "${TRAEFIK_DASHBOARD_USER}" "${TR
 docker run --rm httpd:2.4-alpine htpasswd -nbB "${ADMINER_USER}" "${ADMINER_PASS}" \
   | tr -d '\r' > "${OUT_DIR}/adminer-users"
 
-echo "OK : ${OUT_DIR}/traefik-users et adminer-users (ne pas committer)."
+echo "OK : ${OUT_DIR}/traefik-users et adminer-users."
