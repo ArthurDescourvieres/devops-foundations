@@ -58,7 +58,6 @@ docker build \
 success "Image devops-frontend:latest construite."
 
 # ── Docker Swarm init ────────────────────────────────────────
-# Attention : ne pas utiliser grep "active" sur LocalNodeState — "inactive" contient "active".
 SWARM_STATE="$(docker info --format '{{.Swarm.LocalNodeState}}' 2>/dev/null || echo inactive)"
 SWARM_MANAGER="$(docker info --format '{{.Swarm.ControlAvailable}}' 2>/dev/null || echo false)"
 
@@ -77,8 +76,6 @@ else
 fi
 
 # ── Stack deploy ─────────────────────────────────────────────
-# Déploiement en arrière-plan : sans --detach=false, Docker affiche la progression
-# jusqu'à convergence (peut sembler « bloqué » si un service ne devient jamais healthy).
 info "Déploiement de la stack 'devops'..."
 docker stack deploy -c docker-stack.yml devops
 success "Stack déployée (les services convergent en arrière-plan, voir la boucle ci-dessous)."
