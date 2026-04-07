@@ -82,6 +82,45 @@ export async function getCacheStatus(): Promise<CacheStatus> {
       };
     }
 
+    const visitsRaw = await redisClient.get(VISITS_KEY);
+    const visits = Number(visitsRaw ?? 0);
+    if (Number.isNaN(visits)) {
+      return {
+        status: "error",
+        error: `Invalid visits value in Redis for key ${VISITS_KEY}`,
+      };
+    }
+    return {
+      status: "ok",
+      visits,
+    };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      status: "error",
+      error: message,
+    };
+  }
+}
+
+export async function incrementCacheVisits(): Promise<CacheStatus> {
+  const config = getRedisConfig();
+  if (!config) {
+    return {
+      status: "unavailable",
+      error: "Redis configuration not set (REDIS_URL or REDIS_HOST/REDIS_PORT/REDIS_DB)",
+    };
+  }
+
+  try {
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      return {
+        status: "error",
+        error: "Failed to create Redis client",
+      };
+    }
+
     const visits = await redisClient.incr(VISITS_KEY);
     return {
       status: "ok",

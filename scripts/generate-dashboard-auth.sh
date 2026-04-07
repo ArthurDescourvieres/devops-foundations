@@ -20,8 +20,14 @@ set +a
 : "${TRAEFIK_DASHBOARD_USER:?Définir TRAEFIK_DASHBOARD_USER dans .env}"
 : "${TRAEFIK_DASHBOARD_PASSWORD:?Définir TRAEFIK_DASHBOARD_PASSWORD dans .env}"
 
+# Compat Windows (CRLF): supprime les retours chariot potentiels depuis .env.
+TRAEFIK_DASHBOARD_USER="$(printf '%s' "${TRAEFIK_DASHBOARD_USER}" | tr -d '\r')"
+TRAEFIK_DASHBOARD_PASSWORD="$(printf '%s' "${TRAEFIK_DASHBOARD_PASSWORD}" | tr -d '\r')"
+
 ADMINER_USER="${ADMINER_DASHBOARD_USER:-$TRAEFIK_DASHBOARD_USER}"
 ADMINER_PASS="${ADMINER_DASHBOARD_PASSWORD:-$TRAEFIK_DASHBOARD_PASSWORD}"
+ADMINER_USER="$(printf '%s' "${ADMINER_USER}" | tr -d '\r')"
+ADMINER_PASS="$(printf '%s' "${ADMINER_PASS}" | tr -d '\r')"
 
 mkdir -p "${OUT_DIR}"
 
