@@ -5,9 +5,21 @@ const apiBase =
   "https://api.localhost";
 
 type ServiceState = "idle" | "ok" | "down";
+let didIncrementDuringThisPageLoad = false;
 
 async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(`${apiBase}${path}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+async function postJson<T>(path: string): Promise<T> {
+  const res = await fetch(`${apiBase}${path}`, {
+    method: "POST",
     headers: { Accept: "application/json" },
   });
   if (!res.ok) {
@@ -45,9 +57,7 @@ export default function App() {
       }
 
       try {
-        const cacheRes = await fetchJson<{ status?: string; visits?: number }>(
-          "/cache"
-        );
+        const cacheRes = await fetchJson<{ status?: string; visits?: number }>("/cache");
         if (!cancelled) {
           const ok =
             cacheRes.status === "ok" && typeof cacheRes.visits === "number";
@@ -62,8 +72,36 @@ export default function App() {
       }
     }
 
-    void load();
-    const id = window.setInterval(load, 15_000);
+    async function incrementAndLoad() {
+      if (didIncrementDuringThisPageLoad) {
+        await load();
+        return;
+      }
+      didIncrementDuringThisPageLoad = true;
+
+      try {
+        const incrementRes = await postJson<{ status?: string; visits?: number }>(
+          "/cache/increment"
+        );
+        if (!cancelled) {
+          const ok =
+            incrementRes.status === "ok" &&
+            typeof incrementRes.visits === "number";
+          setCache(ok ? "ok" : "down");
+          if (ok) setVisits(incrementRes.visits ?? 0);
+        }
+      } catch {
+        if (!cancelled) {
+          setCache("down");
+          setVisits(null);
+        }
+      }
+
+      await load();
+    }
+
+    void incrementAndLoad();
+    const id = window.setInterval(load, 50_000);
     return () => {
       cancelled = true;
       window.clearInterval(id);
@@ -72,7 +110,7 @@ export default function App() {
 
   return (
     <main className="page">
-      <h1>DevOps Foundations – Dashboard</h1>
+      <h1>Dashboard</h1>
 
       <section className="card" aria-label="Statut des services">
         <h2>Statut</h2>
