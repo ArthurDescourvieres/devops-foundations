@@ -22,11 +22,11 @@ Pour une vue avec les liens vers PostgreSQL, Redis et SMTP, voir la figure ci-de
 
 1. **Entrée** : `web` (port 80) redirige de façon permanente vers `websecure` (HTTPS, port 443).
 2. **TLS** : les certificats mkcert sont fournis par les fichiers montés dans Traefik (`traefik/certs`, voir `traefik/dynamic/tls.yml`).
-3. **Routage** : le provider Docker découvre les conteneurs avec `traefik.enable=true` et des labels sur le réseau `public`. Chaque route associe un `Host` (ex. `app.localhost`, `api.localhost`) à un service backend et un port interne (load balancer Traefik).
+3. **Routage** : le provider Docker découvre les conteneurs avec `traefik.enable=true` et des labels sur le réseau Compose `public` (nom Docker du type `<projet>_public`, ex. `devops_public`). Chaque route associe un `Host` (ex. `app.localhost`, `api.localhost`) à un service backend et un port interne (load balancer Traefik).
 
 ## Traefik : providers, routeurs, services, middlewares
 
-- **Provider Docker** : Traefik lit les labels des conteneurs sur le réseau attaché (`--providers.docker.network=public`). Les services ne sont pas exposés par défaut (`exposedbydefault=false`) : il faut `traefik.enable=true`.
+- **Provider Docker** : Traefik lit les labels des conteneurs sur le réseau attaché (`--providers.docker.network=${COMPOSE_PROJECT_NAME}_public`, résolu en pratique en `devops_public` si le projet Compose s’appelle `devops`). Les services ne sont pas exposés par défaut (`exposedbydefault=false`) : il faut `traefik.enable=true`.
 - **Provider fichier** : configuration statique dans `traefik/dynamic/` (middlewares partagés, TLS).
 - **Routeurs** : règles `Host(...)`, entrypoint `websecure`, middlewares appliqués.
 - **Services** : pour chaque conteneur, le port cible est explicité avec `traefik.http.services.<nom>.loadbalancer.server.port` lorsque le conteneur n’expose pas le port attendu par défaut (ex. Nginx sur 8080, Vite sur 5173 en dev).
@@ -37,12 +37,12 @@ Pour une vue avec les liens vers PostgreSQL, Redis et SMTP, voir la figure ci-de
 
 ## Réseaux Docker
 
-| Réseau | Contenu typique | Rôle |
-|--------|-----------------|------|
-| `public` | Traefik, frontend, backend, Adminer, Mailpit | Routage HTTPS vers les services « exposés » via le proxy. |
-| `backend` | PostgreSQL, Redis, backend, Adminer, Mailpit | Données et services internes ; pas de conteneur **uniquement** front sur ce réseau. |
+| Réseau (clé Compose) | Nom Docker typique | Contenu typique | Rôle |
+| --- | --- | --- | --- |
+| `public` | `<projet>_public` | Traefik, frontend, backend, Adminer, Mailpit | Routage HTTPS vers les services « exposés » via le proxy. |
+| `backend` | `<projet>_backend` | PostgreSQL, Redis, backend, Adminer, Mailpit | Données et services internes ; pas de conteneur **uniquement** front sur ce réseau. |
 
-Le **frontend** (SPA statique ou serveur Vite en dev) est sur **`public` uniquement**. Il n’a pas besoin d’accéder à PostgreSQL ou Redis : il appelle l’API en HTTPS sur `api.localhost`, et le backend sur le réseau `backend` joint la base et le cache.
+Le **frontend** (SPA statique ou serveur Vite en dev) est sur le réseau **`public` uniquement**. Il n’a pas besoin d’accéder à PostgreSQL ou Redis : il appelle l’API en HTTPS sur `api.localhost`, et le backend sur le réseau **`backend`** joint la base et le cache.
 
 ## Schéma d’architecture
 
