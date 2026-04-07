@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { getDbStatus } from "./db.js";
-import { getCacheStatus } from "./cache.js";
+import { getCacheStatus, incrementCacheVisits } from "./cache.js";
 import { sendContactEmail } from "./contact.js";
 import {
   getCorsAllowHeaders,
@@ -48,6 +48,12 @@ app.get("/db", async (c) => {
 
 app.get("/cache", async (c) => {
   const result = await getCacheStatus();
+  const statusCode = result.status === "ok" ? 200 : 503;
+  return c.json(result, statusCode);
+});
+
+app.post("/cache/increment", async (c) => {
+  const result = await incrementCacheVisits();
   const statusCode = result.status === "ok" ? 200 : 503;
   return c.json(result, statusCode);
 });
