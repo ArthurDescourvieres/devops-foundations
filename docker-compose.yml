@@ -1,3 +1,5 @@
+name: devops
+
 services:
   traefik:
     container_name: traefik
@@ -6,7 +8,7 @@ services:
       - "--api.dashboard=true"
       - "--api.insecure=false"
       - "--providers.docker=true"
-      - "--providers.docker.network=public"
+      - "--providers.docker.network=${COMPOSE_PROJECT_NAME}_public"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/dynamic"
       - "--providers.file.watch=true"
@@ -40,7 +42,7 @@ services:
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     labels:
-      traefik.docker.network: public
+      traefik.docker.network: ${COMPOSE_PROJECT_NAME}_public
       traefik.enable: "true"
       traefik.http.routers.frontend.rule: "Host(`app.localhost`)"
       traefik.http.routers.frontend.entrypoints: "websecure"
@@ -55,7 +57,7 @@ services:
     env_file:
       - .env
     labels:
-      traefik.docker.network: public
+      traefik.docker.network: ${COMPOSE_PROJECT_NAME}_public
       traefik.enable: "true"
       traefik.http.routers.backend.rule: "Host(`api.localhost`)"
       traefik.http.routers.backend.entrypoints: "websecure"
@@ -74,7 +76,7 @@ services:
       - MP_SMTP_BIND_ADDR=0.0.0.0:1025
       - MP_UI_BIND_ADDR=0.0.0.0:8025
     labels:
-      traefik.docker.network: public
+      traefik.docker.network: ${COMPOSE_PROJECT_NAME}_public
       traefik.enable: "true"
       traefik.http.routers.mailpit.rule: "Host(`mail.localhost`)"
       traefik.http.routers.mailpit.entrypoints: "websecure"
@@ -111,7 +113,7 @@ services:
     environment:
       - ADMINER_DEFAULT_SERVER=postgres
     labels:
-      traefik.docker.network: public
+      traefik.docker.network: ${COMPOSE_PROJECT_NAME}_public
       traefik.enable: "true"
       traefik.http.routers.adminer.rule: "Host(`db.localhost`)"
       traefik.http.routers.adminer.entrypoints: "websecure"
@@ -123,9 +125,9 @@ services:
 
 networks:
   public:
-    name: public
+    name: "${COMPOSE_PROJECT_NAME}_public"
   backend:
-    name: backend
+    name: "${COMPOSE_PROJECT_NAME}_backend"
 
 volumes:
   redis-data:

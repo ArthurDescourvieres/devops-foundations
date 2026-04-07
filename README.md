@@ -73,16 +73,18 @@ Pour le workflow Git (GitFlow, commits conventionnels), voir [CONTRIBUTING.md](C
 
 ## Commandes utiles
 
-| Action | Commande |
-|--------|----------|
-| Démarrer en arrière-plan | `docker compose up -d` |
-| Rebuild des images | `docker compose build` ou `docker compose up -d --build` |
-| Rebuild sans cache | `docker compose build --no-cache` |
-| Arrêter | `docker compose down` |
-| Arrêter et supprimer les volumes nommés | `docker compose down -v` |
-| Logs (tous les services) | `docker compose logs -f` |
-| Logs d’un service | `docker compose logs -f frontend` |
-| État des conteneurs | `docker compose ps` |
+
+| Action                                  | Commande                                                 |
+| --------------------------------------- | -------------------------------------------------------- |
+| Démarrer en arrière-plan                | `docker compose up -d`                                   |
+| Rebuild des images                      | `docker compose build` ou `docker compose up -d --build` |
+| Rebuild sans cache                      | `docker compose build --no-cache`                        |
+| Arrêter                                 | `docker compose down`                                    |
+| Arrêter et supprimer les volumes nommés | `docker compose down -v`                                 |
+| Logs (tous les services)                | `docker compose logs -f`                                 |
+| Logs d’un service                       | `docker compose logs -f frontend`                        |
+| État des conteneurs                     | `docker compose ps`                                      |
+
 
 **Production** (sans `docker-compose.override.yml`, avec limites et politiques du fichier prod) :
 
@@ -96,17 +98,23 @@ Les clés `deploy.replicas` et une partie de `deploy` ne s’appliquent qu’ave
 
 Trafic uniquement via Traefik (`:80` redirige vers `:443`). Certificats : mkcert.
 
-| Service | URL | Remarque |
-|---------|-----|----------|
-| Frontend (dashboard) | https://app.localhost | SPA ; en dev, Vite sur le port 5173 derrière Traefik |
-| API backend | https://api.localhost | Rate limiting Traefik sur l’API |
-| Adminer | https://db.localhost | Basic Auth : comptes définis dans `.env`, fichiers générés par `generate-dashboard-auth` |
-| Mailpit (UI) | https://mail.localhost | |
-| Dashboard Traefik | https://traefik.localhost | Basic Auth : idem (fichiers `traefik/auth/*-users`) |
+
+| Service              | URL                                                    | Remarque                                                                                 |
+| -------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Frontend (dashboard) | [https://app.localhost](https://app.localhost)         | SPA ; en dev, Vite sur le port 5173 derrière Traefik                                     |
+| API backend          | [https://api.localhost](https://api.localhost)         | Rate limiting Traefik sur l’API                                                          |
+| Adminer              | [https://db.localhost](https://db.localhost)           | Basic Auth : comptes définis dans `.env`, fichiers générés par `generate-dashboard-auth` |
+| Mailpit (UI)         | [https://mail.localhost](https://mail.localhost)       |                                                                                          |
+| Dashboard Traefik    | [https://traefik.localhost](https://traefik.localhost) | Basic Auth : idem (fichiers `traefik/auth/*-users`)                                      |
+
 
 ## Architecture réseau
 
 Description détaillée des flux, de Traefik et des choix de sécurité : [docs/architecture-reseau.md](docs/architecture-reseau.md).
+
+## Images Docker (comparatif taille)
+
+Pour le livrable « avant / après optimisation », une **référence anti-pattern** volontaire (`Dockerfile.anti-pattern.example`) est comparée aux Dockerfiles multi-stage réels : procédure, commandes et tableau à compléter dans [docs/comparatif-images-docker.md](docs/comparatif-images-docker.md).
 
 ## Sécurité
 
@@ -128,6 +136,8 @@ devops-foundations/
 │   └── backend/
 ├── docs/
 │   ├── architecture-reseau.md
+│   ├── comparatif-images-docker.md
 │   └── images/
 └── scripts/
 ```
+
