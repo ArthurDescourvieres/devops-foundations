@@ -2,7 +2,6 @@ name: devops
 
 services:
   traefik:
-    container_name: traefik
     image: traefik:v3.6
     command:
       - "--api.dashboard=true"
@@ -36,7 +35,6 @@ services:
       traefik.http.routers.traefik.middlewares: "secure@file,compress@file,traefik-auth@file"
 
   frontend:
-    container_name: frontend
     build:
       context: ./src/frontend
       args:
@@ -52,7 +50,6 @@ services:
       - public
 
   backend:
-    container_name: backend
     build: ./src/backend
     env_file:
       - .env
@@ -70,7 +67,6 @@ services:
       - backend
 
   mailpit:
-    container_name: mailpit
     image: axllent/mailpit:v1.29
     environment:
       - MP_SMTP_BIND_ADDR=0.0.0.0:1025
@@ -87,7 +83,6 @@ services:
       - backend
 
   redis:
-    container_name: redis
     image: redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
@@ -96,7 +91,6 @@ services:
       - backend
 
   postgres:
-    container_name: postgres
     image: postgres:16-alpine
     env_file:
       - .env
@@ -106,7 +100,6 @@ services:
       - backend
 
   adminer:
-    container_name: adminer
     image: adminer:5.4.2-standalone
     depends_on:
       - postgres

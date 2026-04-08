@@ -17,10 +17,11 @@ describe('Server Integration Tests', () => {
     const response = await request(app).get('/health');
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
+    expect(response.body).toMatchObject({
       status: 'ok',
       service: 'backend',
     });
+    expect(response.body).toHaveProperty('hostname');
   });
 
   it('should return API information on root route', async () => {
